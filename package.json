@@ -8,6 +8,7 @@
 	"scripts": {
 		"build": "nest build",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+		"migrations:run": "yarn run typeorm migration:run -- -d ./src/config/orm.config.ts",
 		"start": "nodemon",
 		"start:prod": "node dist/main",
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,6 +20,7 @@
 	},
 	"dependencies": {
 		"@nestjs/common": "^9.0.0",
+		"@nestjs/config": "^2.3.0",
 		"@nestjs/core": "^9.0.0",
 		"@nestjs/platform-express": "^9.0.0",
 		"@nestjs/typeorm": "^9.0.1",

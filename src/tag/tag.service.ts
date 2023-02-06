@@ -1,16 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { TagEntity } from './tag.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import PostgresDataSource from '@app/config/orm.config';
 
 @Injectable()
 export class TagService {
-	constructor(
-		@InjectRepository(TagEntity)
-		private readonly tagRepository: Repository<TagEntity>,
-	) {}
-
 	async findAll(): Promise<TagEntity[]> {
-		return this.tagRepository.find();
+		return PostgresDataSource.manager.find(TagEntity);
 	}
 }

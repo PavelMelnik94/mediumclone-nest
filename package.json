@@ -17,8 +17,10 @@
 		"test:cov": "jest --coverage",
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
 		"test:e2e": "jest --config ./test/jest-e2e.json",
-		"typeorm": "typeorm-ts-node-commonjs ",
-		"db:drop": "yarn typeorm schema:drop -d src/config/orm.config.ts"
+		"typeorm": "typeorm-ts-node-commonjs -d src/config/orm.config.ts",
+		"db:drop": "yarn typeorm schema:drop ",
+		"db:create": "yarn typeorm migration:generate src/migrations/CreateTags",
+		"db:migrate": "yarn typeorm migration:run"
 	},
 	"dependencies": {
 		"@nestjs/common": "^9.0.0",

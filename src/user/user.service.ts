@@ -3,8 +3,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserEntity } from './user.entity';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
+import { compare } from 'bcrypt';
 import PostgresDataSource from '@app/config/orm.config';
 import { UserResponseInterface } from './types/userResponse.interface';
+import { LoginUserDto } from './dto/login-user.dto';
 
 const configService = new ConfigService();
 @Injectable()
@@ -36,7 +38,6 @@ export class UserService {
 	}
 
 	generateJWT(user: UserEntity): string {
-		console.log(user);
 		return sign(
 			{
 				id: user.id,
@@ -54,5 +55,34 @@ export class UserService {
 				token: this.generateJWT(user),
 			},
 		};
+	}
+
+	async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+		const inputUser = await PostgresDataSource.manager.findOne(UserEntity, {
+			where: { email: loginUserDto.email },
+			select: ['id', 'email', 'username', 'password', 'bio', 'image'],
+		});
+
+		if (!inputUser) {
+			throw new HttpException(
+				'Email or password is wrong',
+				HttpStatus.UNPROCESSABLE_ENTITY,
+			);
+		}
+
+		const { password: inputPassword } = loginUserDto;
+		const { password: existPassword } = inputUser;
+		const isPasswordCorrect = await compare(inputPassword, existPassword);
+
+		if (!isPasswordCorrect) {
+			throw new HttpException(
+				'Email or password is wrong',
+				HttpStatus.UNPROCESSABLE_ENTITY,
+			);
+		}
+
+		delete inputUser.password;
+
+		return inputUser;
 	}
 }

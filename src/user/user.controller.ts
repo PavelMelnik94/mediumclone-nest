@@ -8,6 +8,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Request } from 'express';
 import { ExpressRequestInterface } from '@app/types/expressRequest.interface';
+import { User } from './decorators/user.decorator';
+import { UserEntity } from './user.entity';
 
 @Controller()
 export class UserController {
@@ -33,8 +35,10 @@ export class UserController {
 
 	@Get('user')
 	async getCurrentUser(
-		@Req() req: ExpressRequestInterface,
+		@User() user: UserEntity,
+		@User('id') currentUserId: number,
 	): Promise<UserResponseInterface> {
-		return this.userService.buildUserResponse(req.user);
+		console.log(currentUserId, 'currentUserId');
+		return this.userService.buildUserResponse(user);
 	}
 }

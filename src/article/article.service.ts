@@ -9,6 +9,7 @@ import { DeleteResult } from 'typeorm';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ArticleQueryInterface } from './types/articleQuery.interface';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
+import { FollowEntity } from '../profile/follow.entity';
 
 @Injectable()
 export class ArticleService {
@@ -157,6 +158,40 @@ export class ArticleService {
 
 		return {
 			articles: articlesWithFavorites,
+			articlesCount,
+		};
+	}
+
+	async getFeed(
+		currentUserId: number,
+		query: Pick<ArticleQueryInterface, 'limit' | 'offset'>,
+	): Promise<ArticlesResponseInterface> {
+		const follows = await PostgresDataSource.manager.find(FollowEntity, {
+			where: { followerId: currentUserId },
+		});
+
+		if (follows.length === 0) {
+			return { articles: [], articlesCount: 0 };
+		}
+
+		const followingUserIds = follows.map((follow) => follow.followingId);
+
+		const qb = PostgresDataSource.manager
+			.createQueryBuilder(ArticleEntity, 'articles')
+			.leftJoinAndSelect('articles.author', 'author')
+			.where('articles.authorId IN (:...ids)', { ids: followingUserIds });
+
+		qb.orderBy('articles.createdAt', 'DESC');
+
+		const articlesCount = await qb.getCount();
+
+		if (query.limit) qb.limit(query.limit);
+		if (query.offset) qb.offset(query.offset);
+
+		const articles = await qb.getMany();
+
+		return {
+			articles,
 			articlesCount,
 		};
 	}

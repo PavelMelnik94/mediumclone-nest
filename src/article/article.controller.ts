@@ -48,6 +48,15 @@ export class ArticleController {
 		return this.articleService.buildArticleResponse(article);
 	}
 
+	@Get('feed')
+	@UseGuards(AuthGuard)
+	async getFeed(
+		@User('id') currentUserId: number,
+		@Query() query: Pick<ArticleQueryInterface, 'limit' | 'offset'>,
+	): Promise<ArticlesResponseInterface> {
+		return await this.articleService.getFeed(currentUserId, query);
+	}
+
 	@Delete(':slug/favorite')
 	@UseGuards(AuthGuard)
 	async deleteArticleFromFavorites(

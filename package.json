@@ -16,6 +16,7 @@
 		"db:drop": "yarn typeorm schema:drop ",
 		"db:create": "yarn typeorm migration:generate src/migrations/UpdateArticle",
 		"db:migrate": "yarn typeorm migration:run",
+		"db:seed": "typeorm-ts-node-commonjs -d src/config/ormSeed.config.ts migration:run",
 		"commit-check": "echo \"linted and fixed\" && exit 0"
 	},
 	"dependencies": {

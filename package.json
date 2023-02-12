@@ -14,7 +14,7 @@
 		"lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
 		"typeorm": "typeorm-ts-node-commonjs -d src/config/orm.config.ts",
 		"db:drop": "yarn typeorm schema:drop ",
-		"db:create": "yarn typeorm migration:generate src/migrations/UpdateArticle",
+		"db:create": "yarn typeorm migration:generate src/migrations/CreateFollows",
 		"db:migrate": "yarn typeorm migration:run",
 		"db:seed": "typeorm-ts-node-commonjs -d src/config/ormSeed.config.ts migration:run",
 		"commit-check": "echo \"linted and fixed\" && exit 0"

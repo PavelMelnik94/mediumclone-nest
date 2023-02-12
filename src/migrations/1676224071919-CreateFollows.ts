@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateFollows1676224071919 implements MigrationInterface {
-    name = 'CreateFollows1676224071919'
+	name = 'CreateFollows1676224071919';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+	public async up(queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`
             CREATE TABLE "follow" (
                 "id" SERIAL NOT NULL,
                 "followerId" integer NOT NULL,
@@ -12,12 +12,11 @@ export class CreateFollows1676224071919 implements MigrationInterface {
                 CONSTRAINT "PK_fda88bc28a84d2d6d06e19df6e5" PRIMARY KEY ("id")
             )
         `);
-    }
+	}
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+	public async down(queryRunner: QueryRunner): Promise<void> {
+		await queryRunner.query(`
             DROP TABLE "follow"
         `);
-    }
-
+	}
 }

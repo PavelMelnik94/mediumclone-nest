@@ -3,6 +3,7 @@ import { UserEntity } from '../user/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { ArticleEntity } from './article.entity';
 import PostgresDataSource from '@app/config/orm.config';
+import { ArticleResponseInterface } from './types/articleResponse.interface';
 
 @Injectable()
 export class ArticleService {
@@ -20,5 +21,9 @@ export class ArticleService {
 		article.author = currentUser;
 
 		return PostgresDataSource.manager.save(article);
+	}
+
+	buildArticleResponse(article: ArticleEntity): ArticleResponseInterface {
+		return { article };
 	}
 }

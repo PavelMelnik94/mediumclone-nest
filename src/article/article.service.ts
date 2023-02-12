@@ -106,6 +106,21 @@ export class ArticleService {
 			});
 		}
 
+		if (query.favorited) {
+			const author = await PostgresDataSource.manager.findOne(UserEntity, {
+				where: { username: query.favorited },
+				relations: ['favorites'],
+			});
+
+			const ids = author.favorites.map((favArticle) => favArticle.id);
+
+			if (ids.length > 0) {
+				qb.andWhere('articles.id IN (:...ids)', { ids });
+			} else {
+				qb.andWhere('1=0');
+			}
+		}
+
 		if (query.limit) {
 			qb.limit(query.limit);
 		}
@@ -123,10 +138,25 @@ export class ArticleService {
 			});
 		}
 
+		let favoriteArticlesIds: number[] = [];
+
+		if (currentUserId) {
+			const user = await PostgresDataSource.manager.findOne(UserEntity, {
+				where: { id: currentUserId },
+				relations: ['favorites'],
+			});
+
+			favoriteArticlesIds = user.favorites.map((favArticle) => favArticle.id);
+		}
+
 		const articles = await qb.getMany();
+		const articlesWithFavorite = articles.map((article) => {
+			const isFavorite = favoriteArticlesIds.includes(article.id);
+			return { ...article, favorited: isFavorite };
+		});
 
 		return {
-			articles,
+			articles: articlesWithFavorite,
 			articlesCount,
 		};
 	}
@@ -151,11 +181,46 @@ export class ArticleService {
 		}
 
 		const isNotAlreadyExistInFavorite: boolean =
-			user.favorites.findIndex((article) => article.id === article.id) === -1;
+			user.favorites.findIndex(
+				(currArticleId) => currArticleId.id === article.id,
+			) === -1;
 
 		if (isNotAlreadyExistInFavorite) {
 			user.favorites.push(article);
 			article.favoritesCount++;
+			PostgresDataSource.manager.save(user);
+			PostgresDataSource.manager.save(article);
+		}
+
+		return article;
+	}
+
+	async deleteArticleFromFavorites(
+		slug: string,
+		currentUserId: number,
+	): Promise<ArticleEntity> {
+		const article = await this.findBySlug(slug);
+
+		if (!article) {
+			throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+		}
+
+		const user = await PostgresDataSource.manager.findOne(UserEntity, {
+			where: { id: currentUserId },
+			relations: ['favorites'],
+		});
+
+		if (!user) {
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		}
+
+		const articleIndex = user.favorites.findIndex(
+			(currArticle) => currArticle.id === article.id,
+		);
+
+		if (articleIndex >= 0) {
+			user.favorites.splice(articleIndex, 1);
+			article.favoritesCount--;
 			PostgresDataSource.manager.save(user);
 			PostgresDataSource.manager.save(article);
 		}

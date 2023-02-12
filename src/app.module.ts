@@ -5,9 +5,10 @@ import { AppService } from '@app/app.service';
 import { UserModule } from './user/user.module';
 import { AuthMiddleware } from './user/middleware/auth.middleware';
 import { ArticleModule } from './article/article.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
-	imports: [TagModule, UserModule, ArticleModule],
+	imports: [TagModule, UserModule, ArticleModule, ProfileModule],
 	controllers: [AppController],
 	providers: [AppService],
 })

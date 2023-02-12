@@ -130,4 +130,36 @@ export class ArticleService {
 			articlesCount,
 		};
 	}
+
+	async addArticleToFavorites(
+		slug: string,
+		currentUserId: number,
+	): Promise<ArticleEntity> {
+		const article = await this.findBySlug(slug);
+
+		if (!article) {
+			throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+		}
+
+		const user = await PostgresDataSource.manager.findOne(UserEntity, {
+			where: { id: currentUserId },
+			relations: ['favorites'],
+		});
+
+		if (!user) {
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+		}
+
+		const isNotAlreadyExistInFavorite: boolean =
+			user.favorites.findIndex((article) => article.id === article.id) === -1;
+
+		if (isNotAlreadyExistInFavorite) {
+			user.favorites.push(article);
+			article.favoritesCount++;
+			PostgresDataSource.manager.save(user);
+			PostgresDataSource.manager.save(article);
+		}
+
+		return article;
+	}
 }

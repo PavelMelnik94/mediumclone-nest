@@ -141,22 +141,22 @@ export class ArticleService {
 		let favoriteArticlesIds: number[] = [];
 
 		if (currentUserId) {
-			const user = await PostgresDataSource.manager.findOne(UserEntity, {
+			const currentUser = await PostgresDataSource.manager.findOne(UserEntity, {
 				where: { id: currentUserId },
 				relations: ['favorites'],
 			});
 
-			favoriteArticlesIds = user.favorites.map((favArticle) => favArticle.id);
+			favoriteArticlesIds = currentUser.favorites.map((f) => f.id);
 		}
 
 		const articles = await qb.getMany();
-		const articlesWithFavorite = articles.map((article) => {
-			const isFavorite = favoriteArticlesIds.includes(article.id);
-			return { ...article, favorited: isFavorite };
+		const articlesWithFavorites = articles.map((article) => {
+			const favorited = favoriteArticlesIds.includes(article.id);
+			return { ...article, favorited };
 		});
 
 		return {
-			articles: articlesWithFavorite,
+			articles: articlesWithFavorites,
 			articlesCount,
 		};
 	}

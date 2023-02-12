@@ -6,6 +6,7 @@ import PostgresDataSource from '@app/config/orm.config';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import slugify from 'slugify';
 import { DeleteResult } from 'typeorm';
+import { UpdateArticleDto } from './dto/update-article.dto';
 
 @Injectable()
 export class ArticleService {
@@ -64,5 +65,28 @@ export class ArticleService {
 		return PostgresDataSource.manager.delete(ArticleEntity, {
 			slug,
 		});
+	}
+
+	async updateArticle(
+		slug: string,
+		updateArticleDto: UpdateArticleDto,
+		currentUserId: number,
+	): Promise<ArticleEntity> {
+		const article = await this.findBySlug(slug);
+
+		if (!article) {
+			throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+		}
+
+		if (article.author.id !== currentUserId) {
+			throw new HttpException(
+				'You are not the author of this article',
+				HttpStatus.FORBIDDEN,
+			);
+		}
+
+		Object.assign(article, updateArticleDto);
+
+		return PostgresDataSource.manager.save(article);
 	}
 }

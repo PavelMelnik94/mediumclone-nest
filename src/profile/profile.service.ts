@@ -19,9 +19,16 @@ export class ProfileService {
 			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 		}
 
+		const follow = await PostgresDataSource.manager.findOne(FollowEntity, {
+			where: {
+				followerId: currentUserId,
+				followingId: user.id,
+			},
+		});
+
 		return {
 			...user,
-			following: false,
+			following: !!follow,
 		};
 	}
 

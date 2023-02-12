@@ -7,7 +7,6 @@ import { compare } from 'bcrypt';
 import PostgresDataSource from '@app/config/orm.config';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/login-user.dto';
-import { UpdateResult } from 'typeorm';
 import { UpdateUserDto } from './dto/updateUser.tdo';
 
 const configService = new ConfigService();

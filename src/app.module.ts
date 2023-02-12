@@ -3,10 +3,11 @@ import { TagModule } from '@app/tag/tag.module';
 import { AppController } from '@app/app.controller';
 import { AppService } from '@app/app.service';
 import { UserModule } from './user/user.module';
-import { AuthMiddleware } from './user/middlewares/auth.meddleware';
+import { AuthMiddleware } from './user/middleware/auth.middleware';
+import { ArticleModule } from './article/article.module';
 
 @Module({
-	imports: [TagModule, UserModule],
+	imports: [TagModule, UserModule, ArticleModule],
 	controllers: [AppController],
 	providers: [AppService],
 })

@@ -85,4 +85,10 @@ export class UserService {
 
 		return inputUser;
 	}
+
+	findById(id: number): Promise<UserEntity> {
+		return PostgresDataSource.manager.findOne(UserEntity, {
+			where: { id },
+		});
+	}
 }

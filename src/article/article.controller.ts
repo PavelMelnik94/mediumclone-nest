@@ -13,13 +13,26 @@ import { UserEntity } from '../user/user.entity';
 import { User } from '../user/decorators/user.decorator';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
-import { Param } from '@nestjs/common/decorators/http/route-params.decorator';
+import {
+	Param,
+	Query,
+} from '@nestjs/common/decorators/http/route-params.decorator';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { ValidationPipe } from '@nestjs/common/pipes';
+import { ArticleQueryInterface } from './types/articleQuery.interface';
+import { ArticlesResponseInterface } from './types/articlesResponse.interface';
 
-@Controller('article')
+@Controller('articles')
 export class ArticleController {
 	constructor(private readonly articleService: ArticleService) {}
+
+	@Get()
+	async findAll(
+		@User('id') currentUserId: number,
+		@Query() query: ArticleQueryInterface,
+	): Promise<ArticlesResponseInterface> {
+		return await this.articleService.findAll(currentUserId, query);
+	}
 
 	@Post()
 	@UseGuards(AuthGuard)

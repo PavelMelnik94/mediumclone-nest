@@ -7,6 +7,8 @@ import { ArticleResponseInterface } from './types/articleResponse.interface';
 import slugify from 'slugify';
 import { DeleteResult } from 'typeorm';
 import { UpdateArticleDto } from './dto/update-article.dto';
+import { ArticleQueryInterface } from './types/articleQuery.interface';
+import { ArticlesResponseInterface } from './types/articlesResponse.interface';
 
 @Injectable()
 export class ArticleService {
@@ -17,9 +19,7 @@ export class ArticleService {
 		const article = new ArticleEntity();
 		Object.assign(article, createArticleDto);
 
-		if (article.tagList) {
-			article.tagList = [];
-		}
+		if (!createArticleDto.tagList.length) article.tagList = [];
 
 		article.slug = this.getSlug(createArticleDto.title);
 		article.author = currentUser;
@@ -88,5 +88,46 @@ export class ArticleService {
 		Object.assign(article, updateArticleDto);
 
 		return PostgresDataSource.manager.save(article);
+	}
+
+	async findAll(
+		currentUserId: number,
+		query: ArticleQueryInterface,
+	): Promise<ArticlesResponseInterface> {
+		const qb = PostgresDataSource.manager
+			.createQueryBuilder(ArticleEntity, 'articles')
+			.leftJoinAndSelect('articles.author', 'author');
+
+		const articlesCount = await qb.getCount();
+
+		if (query.tag) {
+			qb.andWhere('articles.tagList LIKE :tag', {
+				tag: `%${query.tag}%`,
+			});
+		}
+
+		if (query.limit) {
+			qb.limit(query.limit);
+		}
+
+		if (query.offset) {
+			qb.offset(query.offset);
+		}
+
+		if (query.author) {
+			const author = await PostgresDataSource.manager.findOne(UserEntity, {
+				where: { username: query.author },
+			});
+			qb.andWhere('articles.authorId = :id', {
+				id: author.id,
+			});
+		}
+
+		const articles = await qb.getMany();
+
+		return {
+			articles,
+			articlesCount,
+		};
 	}
 }

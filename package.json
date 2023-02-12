@@ -20,7 +20,8 @@
 		"typeorm": "typeorm-ts-node-commonjs -d src/config/orm.config.ts",
 		"db:drop": "yarn typeorm schema:drop ",
 		"db:create": "yarn typeorm migration:generate src/migrations/UpdateArticle",
-		"db:migrate": "yarn typeorm migration:run"
+		"db:migrate": "yarn typeorm migration:run",
+		"commit-check": "echo \"linted and fixed\" && exit 0"
 	},
 	"dependencies": {
 		"@nestjs/common": "^9.0.0",
@@ -86,6 +87,7 @@
 	},
 	"pre-commit": [
 		"lint",
-		"format"
+		"format",
+		"commit-check"
 	]
 }

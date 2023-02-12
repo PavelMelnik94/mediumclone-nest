@@ -7,6 +7,8 @@ import { compare } from 'bcrypt';
 import PostgresDataSource from '@app/config/orm.config';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateResult } from 'typeorm';
+import { UpdateUserDto } from './dto/updateUser.tdo';
 
 const configService = new ConfigService();
 @Injectable()
@@ -90,5 +92,15 @@ export class UserService {
 		return PostgresDataSource.manager.findOne(UserEntity, {
 			where: { id },
 		});
+	}
+
+	async updateUser(
+		userId: number,
+		updateUserDto: UpdateUserDto,
+	): Promise<UserEntity> {
+		const user = this.findById(userId);
+		Object.assign(user, updateUserDto);
+
+		return PostgresDataSource.manager.save(user);
 	}
 }

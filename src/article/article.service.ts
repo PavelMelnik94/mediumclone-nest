@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { UserEntity } from '../user/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { ArticleEntity } from './article.entity';
 import PostgresDataSource from '@app/config/orm.config';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import slugify from 'slugify';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
@@ -40,6 +41,28 @@ export class ArticleService {
 	async findBySlug(slug: string): Promise<ArticleEntity> {
 		return PostgresDataSource.manager.findOne(ArticleEntity, {
 			where: { slug },
+		});
+	}
+
+	async deleteArticle(
+		slug: string,
+		currentUserId: number,
+	): Promise<DeleteResult> {
+		const article = await this.findBySlug(slug);
+
+		if (!article) {
+			throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
+		}
+
+		if (article.author.id !== currentUserId) {
+			throw new HttpException(
+				'You are not the author of this article',
+				HttpStatus.FORBIDDEN,
+			);
+		}
+
+		return PostgresDataSource.manager.delete(ArticleEntity, {
+			slug,
 		});
 	}
 }
